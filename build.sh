@@ -1,8 +1,8 @@
 echo "Maven Building"
-mvn -pl '!plugin-kylin,!ranger-kylin-plugin-shim' -DskipJSTests -DskipTests=true clean package
+mvn -pl '!plugin-kylin,!ranger-kylin-plugin-shim' -DskipJSTests -DskipTests=true clean compile package install
 
-echo "[DEBUG listing distro/target"
+echo "[DEBUG] listing distro/target"
 ls distro/target
 
-echo "[DEBUG] listting local directory"
-ls
+echo "[DEBUG] listing distro"
+ls distro
