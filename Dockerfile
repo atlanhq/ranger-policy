@@ -1,4 +1,3 @@
-#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,8 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-echo "Maven Building"
-mvn -pl '!plugin-kylin,!ranger-kylin-plugin-shim' -DskipJSTests -DskipTests=true -Drat.skip=true clean package -Pall
+FROM openjdk:8-jdk-alpine
 
-echo "[DEBUG] listing /home/runner/work/ranger-policy/ranger-policy/target"
-ls /home/runner/work/ranger-policy/ranger-policy/target
+RUN mkdir -p /opt/apache/ranger-admin
+
+RUN apk --no-cache add python bash java-postgresql-jdbc bc shadow procps curl && \
+    apk --no-cache update && \
+    apk --no-cache upgrade && \
+    groupadd -r ranger -g 6080 && \
+    useradd --no-log-init -r -g ranger -u 6080 -d /opt/apache/ranger-admin ranger
+
+COPY ranger-policy/target/ranger-3.0.0-SNAPSHOT-admin.tar.gz /ranger-3.0.0-SNAPSHOT-admin.tar.gz
+RUN tar -xzf /ranger-3.0.0-SNAPSHOT-admin.tar.gz -C /opt/apache/ranger-admin --strip-components=1
+
+WORKDIR /opt/apache/ranger-admin
+RUN chmod +x /opt/apache/ranger-admin/ews/ranger-admin-services.sh
+
+EXPOSE 6080
+
+ENTRYPOINT ["/bin/bash", "-c", "/opt/apache/ranger-admin/setup.sh && ranger-admin start && tail -F ews/logs/*.log"]
