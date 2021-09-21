@@ -23,7 +23,7 @@ RUN apk --no-cache add python bash java-postgresql-jdbc bc shadow procps curl &&
     groupadd -r ranger -g 6080 && \
     useradd --no-log-init -r -g ranger -u 6080 -d /opt/apache/ranger-admin ranger
 
-COPY ranger-policy/target/ranger-3.0.0-SNAPSHOT-admin.tar.gz /ranger-3.0.0-SNAPSHOT-admin.tar.gz
+COPY /home/runner/work/ranger-policy/ranger-policy/target/ranger-3.0.0-SNAPSHOT-admin.tar.gz /ranger-3.0.0-SNAPSHOT-admin.tar.gz
 RUN tar -xzf /ranger-3.0.0-SNAPSHOT-admin.tar.gz -C /opt/apache/ranger-admin --strip-components=1
 
 WORKDIR /opt/apache/ranger-admin
