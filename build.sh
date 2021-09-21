@@ -19,3 +19,6 @@ mvn -pl '!plugin-kylin,!ranger-kylin-plugin-shim' -DskipJSTests -DskipTests=true
 
 echo "[DEBUG] listing /home/runner/work/ranger-policy/ranger-policy/target"
 ls /home/runner/work/ranger-policy/ranger-policy/target
+
+echo "[DEBUG] listing target directory"
+ls target
