@@ -29,6 +29,10 @@ RUN tar -xzf /ranger-3.0.0-SNAPSHOT-admin.tar.gz -C /opt/apache/ranger-admin --s
 WORKDIR /opt/apache/ranger-admin
 RUN chmod +x /opt/apache/ranger-admin/ews/ranger-admin-services.sh
 
+RUN wget https://atlan-public.s3-eu-west-1.amazonaws.com/ranger-plugins/ranger-heka-plugin-1.0-SNAPSHOT.jar && \
+    mkdir /opt/apache/ranger-admin/ews/webapp/WEB-INF/classes/ranger-plugins/heka/ && \
+    mv ./ranger-heka-plugin-1.0-SNAPSHOT.jar /opt/apache/ranger-admin/ews/webapp/WEB-INF/classes/ranger-plugins/heka/
+
 EXPOSE 6080
 
 ENTRYPOINT ["/bin/bash", "-c", "/opt/apache/ranger-admin/setup.sh && ranger-admin start && tail -F ews/logs/*.log"]
