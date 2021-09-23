@@ -24,6 +24,7 @@ RUN apk --no-cache add python bash java-postgresql-jdbc bc shadow procps curl &&
     useradd --no-log-init -r -g ranger -u 6080 -d /opt/apache/ranger-admin ranger
 
 COPY target/ranger-3.0.0-SNAPSHOT-admin.tar.gz /ranger-3.0.0-SNAPSHOT-admin.tar.gz
+COPY target/ranger-3.0.0-SNAPSHOT-atlas-plugin.tar.gz /ranger-3.0.0-SNAPSHOT-atlas-plugin.tar.gz
 RUN tar -xzf /ranger-3.0.0-SNAPSHOT-admin.tar.gz -C /opt/apache/ranger-admin --strip-components=1
 
 WORKDIR /opt/apache/ranger-admin
