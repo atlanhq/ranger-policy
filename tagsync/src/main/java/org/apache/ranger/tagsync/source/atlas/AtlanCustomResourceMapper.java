@@ -26,7 +26,9 @@ import org.apache.ranger.plugin.model.RangerPolicy;
 import org.apache.ranger.plugin.model.RangerServiceResource;
 import org.apache.ranger.tagsync.source.atlasrest.RangerAtlasEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AtlanCustomResourceMapper extends AtlasResourceMapper {
@@ -43,8 +45,19 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
     public static final String RANGER_TYPE_ATLAN_SCHEMA = "schema";
     public static final String RANGER_TYPE_ATLAN_TABLE  = "table";
     public static final String RANGER_TYPE_ATLAN_COLUMN = "column";
+    
+    public static final String RESOURCE_TYPE_CATEGORY                 = "type-category";
+    public static final String RESOURCE_TYPE_NAME                     = "type";
+    public static final String RESOURCE_ENTITY_TYPE                   = "entity-type";
+    public static final String RESOURCE_ENTITY_CLASSIFICATION         = "entity-classification";
+    public static final String RESOURCE_CLASSIFICATION                = "classification";
+    public static final String RESOURCE_ENTITY_ID                     = "entity";
+    public static final String RESOURCE_ENTITY_LABEL                  = "entity-label";
+    public static final String RESOURCE_ENTITY_BUSINESS_METADATA      = "entity-business-metadata";
+    public static final String RESOURCE_ENTITY_OWNER                  = "owner";
 
-    public static final String ATLAN_DELIMITER          = "/";
+    public static final String ATLAN_DELIMITER = "/";
+    public static final String ASTERISK = "*";
 
     public static final String[] SUPPORTED_ENTITY_TYPES = { ENTITY_TYPE_ATLAN_DB, ENTITY_TYPE_ATLAN_TABLE, ENTITY_TYPE_ATLAN_COLUMN };
 
@@ -80,6 +93,18 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
         }
 
         String   entityType  = entity.getTypeName();
+        String   entityId = (String)entity.getAttributes().get(AtlasResourceMapper.ENTITY_ATTRIBUTE_QUALIFIED_NAME);
+
+        List<EntityNotificationWrapper.RangerAtlasClassification>  entityClassifications =  entity.getTags();
+
+        List<String> classificationNamesList = new ArrayList<>();
+
+        if (entityClassifications != null) {
+            for (EntityNotificationWrapper.RangerAtlasClassification classification : entityClassifications) {
+                classificationNamesList.add(classification.getName());
+            }
+        }
+
         String   entityGuid  = entity.getGuid();
         String   serviceName = getRangerServiceName(clusterName);
 
@@ -87,8 +112,7 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
         // Schema - default/snowflake/nitya-test-connection-api/SUDH_TEST_DBT/PUBLIC
         // Table -  default/snowflake/nitya-test-connection-api/TEST_LINEAGE/PUBLIC/BENCHMARK316
         // Column   default/snowflake/nitya-test-connection-api/DEMO_DB/PUBLIC/COVID_STATE_LEVEL_STATS_AGG/TOT_ACTIVE
-       //           default/snowflake/nitya-test-connection-api/TEST_LINEAGE/TEST_CLONE/BENCHMARK1343/aisle
-       //             default/snowflake/nitya-test-connection-api/TEST_LINEAGE/TEST_CLONE/BENCHMARK349
+
 
 
         String[] resources   = qualifiedName.split(ATLAN_DELIMITER);
@@ -102,37 +126,27 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
 
         Map<String, RangerPolicy.RangerPolicyResource> elements = new HashMap<String, RangerPolicy.RangerPolicyResource>();
 
-        LOG.info(" entity type =>" + entityType + " tenantId = " + tenantId + " vendor = "+ vendor +"  connection= " + connnection +" dbName = "+ dbName + "schemaName="+ schemaName +"tblName= "+ tblName+ " colName "+ colName);
+        LOG.info(" entity type =>" + entityType + " tenantId = " + tenantId + " vendor = "+ vendor +"  connection= " + connnection +" dbName = "+ dbName + "schemaName="+ schemaName +"tblName= "+ tblName+ " entityClassifications "+ entityClassifications);
 
-        if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_DB)) {
-            if (StringUtils.isNotEmpty(dbName)) {
-                elements.put(RANGER_TYPE_ATLAN_DB, new RangerPolicy.RangerPolicyResource(dbName));
+        //TODO - DO we want to specific entity types ?
+        if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_DB) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_SCHEMA) ||
+                StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_COLUMN)){
+
+            if  (StringUtils.isNotEmpty(entityType) && StringUtils.isNotEmpty(qualifiedName) && !classificationNamesList.isEmpty())
+            {
+                elements.put(RESOURCE_ENTITY_TYPE, new RangerPolicy.RangerPolicyResource(ASTERISK));
+                elements.put(RESOURCE_ENTITY_CLASSIFICATION, new RangerPolicy.RangerPolicyResource(classificationNamesList, null,null));
+  //              elements.put(RESOURCE_CLASSIFICATION, new RangerPolicy.RangerPolicyResource(classificationNamesList, null,null));
+                elements.put(RESOURCE_ENTITY_ID, new RangerPolicy.RangerPolicyResource("*"));
             }
-        } else if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_SCHEMA)) {
-            if (StringUtils.isNotEmpty(dbName) && StringUtils.isNotEmpty(schemaName)) {
-                elements.put(RANGER_TYPE_ATLAN_DB, new RangerPolicy.RangerPolicyResource(dbName));
-                elements.put(RANGER_TYPE_ATLAN_SCHEMA, new RangerPolicy.RangerPolicyResource(schemaName));
-            }
-        } else if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE)) {
-            if (StringUtils.isNotEmpty(dbName) && StringUtils.isNotEmpty(schemaName) && StringUtils.isNotEmpty(tblName)) {
-                elements.put(RANGER_TYPE_ATLAN_DB, new RangerPolicy.RangerPolicyResource(dbName));
-                elements.put(RANGER_TYPE_ATLAN_SCHEMA, new RangerPolicy.RangerPolicyResource(schemaName));
-                elements.put(RANGER_TYPE_ATLAN_TABLE, new RangerPolicy.RangerPolicyResource(tblName));
-            }
-        } else if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_COLUMN)) {
-            if (StringUtils.isNotEmpty(dbName) && StringUtils.isNotEmpty(schemaName) && StringUtils.isNotEmpty(tblName) && StringUtils.isNotEmpty(colName)) {
-                elements.put(RANGER_TYPE_ATLAN_DB, new RangerPolicy.RangerPolicyResource(dbName));
-                elements.put(RANGER_TYPE_ATLAN_SCHEMA, new RangerPolicy.RangerPolicyResource(schemaName));
-                elements.put(RANGER_TYPE_ATLAN_TABLE, new RangerPolicy.RangerPolicyResource(tblName));
-                elements.put(RANGER_TYPE_ATLAN_COLUMN, new RangerPolicy.RangerPolicyResource(colName));
-            }
+
         } else {
             throwExceptionWithMessage("unrecognized entity-type: " + entityType);
         }
 
 
         if(elements.isEmpty()) {
-            throwExceptionWithMessage("invalid qualifiedName for entity-type '" + entityType + "': " + qualifiedName);
+            throwExceptionWithMessage("skipping since classifications are not present "+ entityClassifications + " qualifiedName for entity-type '" + entityType + "': " + qualifiedName);
         }
 
         RangerServiceResource ret = new RangerServiceResource(entityGuid, serviceName, elements);
@@ -175,6 +189,8 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
         }
         return ret;
     }
+
+
     //ranger.tagsync.atlas.<component>.instance.<%default%>.ranger.service
 
     protected String getCustomRangerServiceName(String atlasInstanceName) {

@@ -256,7 +256,7 @@ public class AtlasNotificationMapper {
     static private ServiceTags buildServiceTags(RangerAtlasEntityWithTags entityWithTags, Map<String, ServiceTags> serviceTagsMap) {
         ServiceTags             ret             = null;
         RangerAtlasEntity       entity          = entityWithTags.getEntity();
-        RangerServiceResource  serviceResource  = AtlasResourceMapperUtil.getRangerServiceResource(entity);
+        RangerServiceResource  serviceResource  = AtlasResourceMapperUtil.getRangerServiceResource(entityWithTags);
 
         if (serviceResource != null) {
 

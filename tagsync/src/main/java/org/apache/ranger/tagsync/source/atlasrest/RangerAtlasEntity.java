@@ -18,19 +18,29 @@ package org.apache.ranger.tagsync.source.atlasrest;
  * limitations under the License.
  */
 
+import org.apache.ranger.tagsync.source.atlas.EntityNotificationWrapper;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RangerAtlasEntity {
 
-    private final String typeName;
-    private final String guid;
-    private final Map<String, Object> attributes;
+    private  String typeName;
+    private  String guid;
+    private  Map<String, Object> attributes;
+    private  List<EntityNotificationWrapper.RangerAtlasClassification> tags;
+
 
     public RangerAtlasEntity(String typeName, String guid, Map<String, Object> attributes) {
         this.typeName = typeName;
         this.guid = guid;
         this.attributes = attributes == null ? new HashMap<String, Object>() : attributes;
+    }
+
+    public RangerAtlasEntity(String typeName, String guid, Map<String, Object> attributes,List<EntityNotificationWrapper.RangerAtlasClassification> tags) {
+        this(typeName,guid,attributes);
+        this.tags = tags;
     }
 
     public String getTypeName() {
@@ -42,6 +52,16 @@ public class RangerAtlasEntity {
     }
 
     public Map<String, Object> getAttributes() { return attributes; }
+
+
+    public List<EntityNotificationWrapper.RangerAtlasClassification> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<EntityNotificationWrapper.RangerAtlasClassification> tags) {
+        this.tags = tags;
+    }
+
 
     @Override
     public String toString() {

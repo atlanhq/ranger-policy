@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ranger.tagsync.process.TagSyncConfig;
 import org.apache.ranger.tagsync.source.atlasrest.RangerAtlasEntity;
+import org.apache.ranger.tagsync.source.atlasrest.RangerAtlasEntityWithTags;
 
 public class AtlasResourceMapperUtil {
 	private static final Log LOG = LogFactory.getLog(AtlasResourceMapperUtil.class);
@@ -50,25 +51,28 @@ public class AtlasResourceMapperUtil {
 		return ret;
 	}
 
-	public static RangerServiceResource getRangerServiceResource(RangerAtlasEntity atlasEntity) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("==> getRangerServiceResource(" + atlasEntity.getGuid() +")");
-		}
+	public static RangerServiceResource getRangerServiceResource(RangerAtlasEntityWithTags atlasEntity) {
+		RangerAtlasEntity entity = atlasEntity.getEntity();
+		List<EntityNotificationWrapper.RangerAtlasClassification> tags = atlasEntity.getTags();
 
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("==> getRangerServiceResource(" + entity.getGuid() +")");
+		}
 		RangerServiceResource resource = null;
 
-		AtlasResourceMapper mapper = atlasResourceMappers.get(atlasEntity.getTypeName());
+		AtlasResourceMapper mapper = atlasResourceMappers.get(entity.getTypeName());
 
 		if (mapper != null) {
 			try {
-				resource = mapper.buildResource(atlasEntity);
+				RangerAtlasEntity entity1 = new RangerAtlasEntity(entity.getTypeName(), entity.getGuid(), entity.getAttributes(), tags);
+				resource = mapper.buildResource(entity1);
 			} catch (Exception exception) {
-				LOG.error("Could not get serviceResource for atlas entity:" + atlasEntity.getGuid() + ": ", exception);
+				LOG.error("Could not get serviceResource for atlas entity:" + entity.getGuid() + ": ", exception);
 			}
 		}
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("<== getRangerServiceResource(" + atlasEntity.getGuid() +"): resource=" + resource);
+			LOG.debug("<== getRangerServiceResource(" + entity.getGuid() +"): resource=" + resource);
 		}
 
 		return resource;
