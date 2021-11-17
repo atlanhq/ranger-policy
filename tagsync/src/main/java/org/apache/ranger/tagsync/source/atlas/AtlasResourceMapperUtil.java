@@ -40,15 +40,15 @@ public class AtlasResourceMapperUtil {
 			LOG.debug("==> isEntityTypeHandled(entityTypeName=" + entityTypeName + ")");
 		}
 
-		AtlasResourceMapper mapper = atlasResourceMappers.get(entityTypeName);
+//		AtlasResourceMapper mapper = atlasResourceMappers.get(entityTypeName);
+//
+//		boolean ret = mapper != null;
 
-		boolean ret = mapper != null;
+//		if (LOG.isDebugEnabled()) {
+//			LOG.debug("<== isEntityTypeHandled(entityTypeName=" + entityTypeName + ") : " + ret);
+//		}
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("<== isEntityTypeHandled(entityTypeName=" + entityTypeName + ") : " + ret);
-		}
-
-		return ret;
+		return true;
 	}
 
 	public static RangerServiceResource getRangerServiceResource(RangerAtlasEntityWithTags atlasEntity) {
@@ -60,7 +60,7 @@ public class AtlasResourceMapperUtil {
 		}
 		RangerServiceResource resource = null;
 
-		AtlasResourceMapper mapper = atlasResourceMappers.get(entity.getTypeName());
+		AtlasResourceMapper mapper = atlasResourceMappers.get("ATLANTYPE");
 
 		if (mapper != null) {
 			try {
@@ -89,13 +89,13 @@ public class AtlasResourceMapperUtil {
 		boolean ret = true;
 
 		List<String> mapperNames = new ArrayList<String>();
-		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHiveResourceMapper");
-		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHdfsResourceMapper");
-		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHbaseResourceMapper");
-		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasKafkaResourceMapper");
-		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasOzoneResourceMapper");
-
-		mapperNames.add(AtlasAdlsResourceMapper.class.getName());
+//		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHiveResourceMapper");
+//		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHdfsResourceMapper");
+//		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHbaseResourceMapper");
+//		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasKafkaResourceMapper");
+//		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasOzoneResourceMapper");
+//
+//		mapperNames.add(AtlasAdlsResourceMapper.class.getName());
 
 		if (StringUtils.isNotBlank(customMapperNames)) {
 			for (String customMapperName : customMapperNames.split(MAPPER_NAME_DELIMITER)) {
@@ -111,7 +111,7 @@ public class AtlasResourceMapperUtil {
 				resourceMapper.initialize(properties);
 
 				for (String entityTypeName : resourceMapper.getSupportedEntityTypes()) {
-					add(entityTypeName, resourceMapper);
+					add("ATLANTYPE", resourceMapper);
 				}
 
 			} catch (Exception exception) {

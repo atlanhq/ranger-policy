@@ -129,8 +129,8 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
         LOG.info(" entity type =>" + entityType + " tenantId = " + tenantId + " vendor = "+ vendor +"  connection= " + connnection +" dbName = "+ dbName + "schemaName="+ schemaName +"tblName= "+ tblName+ " entityClassifications "+ entityClassifications);
 
         //TODO - DO we want to specific entity types ?
-        if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_DB) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_SCHEMA) ||
-                StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_COLUMN)){
+//        if (StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_DB) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_SCHEMA) ||
+//                StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_TABLE) || StringUtils.equals(entityType, ENTITY_TYPE_ATLAN_COLUMN)){
 
             if  (StringUtils.isNotEmpty(entityType) && StringUtils.isNotEmpty(qualifiedName) && !classificationNamesList.isEmpty())
             {
@@ -140,9 +140,9 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
                 elements.put(RESOURCE_ENTITY_ID, new RangerPolicy.RangerPolicyResource("*"));
             }
 
-        } else {
-            throwExceptionWithMessage("unrecognized entity-type: " + entityType);
-        }
+//        } else {
+//            throwExceptionWithMessage("unrecognized entity-type: " + entityType);
+//        }
 
 
         if(elements.isEmpty()) {
