@@ -30,7 +30,51 @@
                     <target>8</target>
                 </configuration>
             </plugin>
-        </plugins>
+
+            <!-- Maven Shade Plugin -->
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.3</version>
+            <executions>
+                <!-- Run shade goal on package phase -->
+                <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>shade</goal>
+                </goals>
+                <configuration>
+                <filters>
+                    <filter>
+                        <artifact>*:*</artifact>
+                        <excludes>
+                            <exclude>com/sun*</exclude>
+                            <exclude>META-INF/*.SF</exclude>
+                            <exclude>META-INF/*.DSA</exclude>
+                            <exclude>META-INF/*.RSA</exclude>
+                        </excludes>
+                    </filter>
+                </filters>
+                <artifactSet>
+                  <excludes>
+                     <exclude>com.google.protobuf:protobuf-java</exclude>
+                   </excludes>
+               </artifactSet>
+                <transformers>
+                    <!-- add Main-Class to manifest file -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <mainClass>com.mkyong.core.utils.App</mainClass>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </transformer>
+                </transformers>
+                </configuration>
+                </execution>
+            </executions>
+            </plugin>
+
+		</plugins>
     </build>
     <packaging>jar</packaging>
     <properties>
@@ -54,19 +98,9 @@
             <version>${commons.lang.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
             <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -230,7 +230,7 @@ public class RangerPolicyDeltaUtil {
             } else if (!isPoliciesExist && !isPolicyDeltasExist) {
                 LOG.warn("ServicePolicies do not contain any policies or policy-deltas!! There are no material changes in the policies.");
                 LOG.warn("Downloaded ServicePolicies are [" + servicePolicies + "]");
-                ret = null;
+                ret = false;
             } else {
                 ret = isPolicyDeltasExist;
             }
