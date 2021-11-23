@@ -60,7 +60,7 @@ public class AtlasResourceMapperUtil {
 		}
 		RangerServiceResource resource = null;
 
-		AtlasResourceMapper mapper = atlasResourceMappers.get("ATLANTYPE");
+		AtlasResourceMapper mapper = atlasResourceMappers.get(entity.getTypeName());
 
 		if (mapper != null) {
 			try {
@@ -94,8 +94,9 @@ public class AtlasResourceMapperUtil {
 //		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasHbaseResourceMapper");
 //		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasKafkaResourceMapper");
 //		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlasOzoneResourceMapper");
+		mapperNames.add("org.apache.ranger.tagsync.source.atlas.AtlanHekaResourceMapper");
 //
-//		mapperNames.add(AtlasAdlsResourceMapper.class.getName());
+		// mapperNames.add(AtlasAdlsResourceMapper.class.getName());
 
 		if (StringUtils.isNotBlank(customMapperNames)) {
 			for (String customMapperName : customMapperNames.split(MAPPER_NAME_DELIMITER)) {
@@ -111,8 +112,9 @@ public class AtlasResourceMapperUtil {
 				resourceMapper.initialize(properties);
 
 				for (String entityTypeName : resourceMapper.getSupportedEntityTypes()) {
-					add("ATLANTYPE", resourceMapper);
+					add(entityTypeName, resourceMapper);
 				}
+
 
 			} catch (Exception exception) {
 				LOG.error("Failed to create AtlasResourceMapper:" + mapperName + ": ", exception);
