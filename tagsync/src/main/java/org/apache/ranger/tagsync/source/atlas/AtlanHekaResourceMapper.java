@@ -107,7 +107,7 @@ public class AtlanHekaResourceMapper extends AtlasResourceMapper {
         }
 
         String   entityGuid  = entity.getGuid();
-        String  serviceName = "default_" + HEKA_SERVICE_NAME;
+        String  serviceName = HEKA_SERVICE_NAME;
         // String   serviceName = getRangerServiceName(clusterName);
 
         // DB -     default/snowflake/nitya-test-connection-api/TEST_DB

@@ -40,15 +40,15 @@ public class AtlasResourceMapperUtil {
 			LOG.debug("==> isEntityTypeHandled(entityTypeName=" + entityTypeName + ")");
 		}
 
-//		AtlasResourceMapper mapper = atlasResourceMappers.get(entityTypeName);
-//
-//		boolean ret = mapper != null;
+		AtlasResourceMapper mapper = atlasResourceMappers.get(entityTypeName);
 
-//		if (LOG.isDebugEnabled()) {
-//			LOG.debug("<== isEntityTypeHandled(entityTypeName=" + entityTypeName + ") : " + ret);
-//		}
+		boolean ret = mapper != null;
 
-		return true;
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<== isEntityTypeHandled(entityTypeName=" + entityTypeName + ") : " + ret);
+		}
+
+		return ret;
 	}
 
 	public static RangerServiceResource getRangerServiceResource(RangerAtlasEntityWithTags atlasEntity) {
@@ -98,11 +98,11 @@ public class AtlasResourceMapperUtil {
 //
 		// mapperNames.add(AtlasAdlsResourceMapper.class.getName());
 
-		if (StringUtils.isNotBlank(customMapperNames)) {
-			for (String customMapperName : customMapperNames.split(MAPPER_NAME_DELIMITER)) {
-				mapperNames.add(customMapperName.trim());
-			}
-		}
+		// if (StringUtils.isNotBlank(customMapperNames)) {
+		// 	for (String customMapperName : customMapperNames.split(MAPPER_NAME_DELIMITER)) {
+		// 		mapperNames.add(customMapperName.trim());
+		// 	}
+		// }
 
 		for (String mapperName : mapperNames) {
 			try {
