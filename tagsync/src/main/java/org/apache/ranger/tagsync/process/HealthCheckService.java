@@ -20,6 +20,7 @@
 package org.apache.ranger.tagsync.process;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.atlas.ApplicationProperties;
@@ -62,38 +63,37 @@ public class HealthCheckService implements HttpHandler {
             JSONObject json = new JSONObject();
 
             try {
-                boolean ret = listKafkaTopics(conf);
-
-
+                boolean isKafkaUp = listKafkaTopics(conf);
                 boolean isRangerUp = checkRangerHealth(props);
 
-                try {
-                    json.put("Kafka", ret);
-                    json.put("Ranger", isRangerUp);
-                } catch (JSONException e) {
-                    LOG.error("Error while json ", e);
-                }
+                json.put("Kafka", isKafkaUp);
+                json.put("Ranger", isRangerUp);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error("Error while Kafka/Ranger lookup ", e);
             }
-            handleResponse(httpExchange,  json.toString());
+            handleResponse(httpExchange, json.toString());
         }
     }
 
+    private void handleResponse(HttpExchange httpExchange, String output) throws IOException {
 
-    private void handleResponse(HttpExchange httpExchange, String requestParamValue) throws IOException {
+        Headers headers = httpExchange.getResponseHeaders();
+        headers.add("Content-Type", "application/json");
 
         OutputStream outputStream = httpExchange.getResponseBody();
-        String htmlResponse = requestParamValue.toString();
+        String htmlResponse = output.toString();
+
         httpExchange.sendResponseHeaders(200, htmlResponse.length());
-        outputStream.write(htmlResponse.getBytes());
 
-        outputStream.flush();
-        outputStream.close();
-
+        try {
+            outputStream.write(htmlResponse.getBytes());
+            outputStream.flush();
+        }finally {
+            outputStream.close();
+        }
     }
 
-    static boolean listKafkaTopics(Configuration configs) {
+    public static boolean listKafkaTopics(Configuration configs) {
 
         Map<String, List<PartitionInfo>> topics = null;
         boolean ret = false;
@@ -120,7 +120,7 @@ public class HealthCheckService implements HttpHandler {
         return ret;
     }
 
-    static boolean checkRangerHealth(Properties properties) throws Exception {
+   public static boolean checkRangerHealth(Properties properties) throws Exception {
 
         String url = properties.getProperty("ranger.tagsync.dest.ranger.endpoint");
         String username = properties.getProperty("ranger.tagsync.dest.ranger.username");
@@ -129,8 +129,8 @@ public class HealthCheckService implements HttpHandler {
 
         RangerRESTClient restClient = new RangerRESTClient(url, sslConfigFile, TagSyncConfig.getInstance());
         restClient.setBasicAuthInfo(username, password);
-        ClientResponse response = restClient.get("/tags/tagdefs", null, null);
-        LOG.info("response ==>>" + response);
+        ClientResponse response = restClient.get("/service/tags/tagdefs", null);
+        LOG.info("Ranger API /service/tags/tagdefs response" + response.getStatus());
 
         return (response.getStatus() == ClientResponse.Status.OK.getStatusCode());
     }
