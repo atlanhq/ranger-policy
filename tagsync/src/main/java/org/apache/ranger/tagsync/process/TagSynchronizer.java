@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetSocketAddress;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -76,6 +79,20 @@ public class TagSynchronizer {
 		boolean tagSynchronizerInitialized = tagSynchronizer.initialize();
 
 		if (tagSynchronizerInitialized) {
+
+			try {
+				ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+
+				HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 9999), 0);
+				server.createContext("/status", new HealthCheckService(props));
+				server.setExecutor(threadPoolExecutor);
+				server.start();
+
+				LOG.info(" HttpServer started on port 9999 for monitoring");
+			} catch (Exception e) {
+				LOG.error("Error while starting monitoring HttpServer server..:", e);
+			}
+
 			try {
 				tagSynchronizer.run();
 			} catch (Throwable t) {

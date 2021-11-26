@@ -19,6 +19,7 @@
 
 package org.apache.ranger.tagsync.source.atlas;
 
+import org.apache.atlas.model.instance.AtlasClassification;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,13 +96,13 @@ public class AtlanCustomResourceMapper extends AtlasResourceMapper {
         String   entityType  = entity.getTypeName();
         String   entityId = (String)entity.getAttributes().get(AtlasResourceMapper.ENTITY_ATTRIBUTE_QUALIFIED_NAME);
 
-        List<EntityNotificationWrapper.RangerAtlasClassification>  entityClassifications =  entity.getTags();
+        List<AtlasClassification>  entityClassifications =  entity.getTags();
 
         List<String> classificationNamesList = new ArrayList<>();
 
         if (entityClassifications != null) {
-            for (EntityNotificationWrapper.RangerAtlasClassification classification : entityClassifications) {
-                classificationNamesList.add(classification.getName());
+            for (AtlasClassification classification : entityClassifications) {
+                classificationNamesList.add(classification.getTypeName());
             }
         }
 

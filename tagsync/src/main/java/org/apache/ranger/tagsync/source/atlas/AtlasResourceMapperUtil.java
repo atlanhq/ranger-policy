@@ -64,7 +64,7 @@ public class AtlasResourceMapperUtil {
 
 		if (mapper != null) {
 			try {
-				RangerAtlasEntity entity1 = new RangerAtlasEntity(entity.getTypeName(), entity.getGuid(), entity.getAttributes(), tags);
+				RangerAtlasEntity entity1 = new RangerAtlasEntity(entity.getTypeName(), entity.getGuid(), entity.getAttributes(), entity.getTags());
 				resource = mapper.buildResource(entity1);
 			} catch (Exception exception) {
 				LOG.error("Could not get serviceResource for atlas entity:" + entity.getGuid() + ": ", exception);

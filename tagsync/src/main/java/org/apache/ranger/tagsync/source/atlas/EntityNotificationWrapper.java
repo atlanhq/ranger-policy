@@ -86,8 +86,9 @@ public class EntityNotificationWrapper {
                 AtlasEntityHeader    atlasEntity    = v2Notification.getEntity();
                 String               guid           = atlasEntity.getGuid();
                 String               typeName       = atlasEntity.getTypeName();
-
-                rangerAtlasEntity      = new RangerAtlasEntity(typeName, guid, atlasEntity.getAttributes());
+                List<AtlasClassification> tags = v2Notification.getClassifications();
+                LOG.info(" tag applied/removed on entity" + tags);
+                rangerAtlasEntity      = new RangerAtlasEntity(typeName, guid, atlasEntity.getAttributes(), tags);
                 entityTypeName         = atlasEntity.getTypeName();
                 isEntityActive         = atlasEntity.getStatus() == AtlasEntity.Status.ACTIVE;
                 isEntityTypeHandled    = AtlasResourceMapperUtil.isEntityTypeHandled(entityTypeName);
@@ -95,7 +96,8 @@ public class EntityNotificationWrapper {
                 isEntityCreateOp       = EntityNotificationV2.OperationType.ENTITY_CREATE == v2Notification.getOperationType();
                 isEmptyClassifications = CollectionUtils.isEmpty(atlasEntity.getClassifications());
 
-                List<AtlasClassification> allClassifications = atlasEntity.getClassifications();
+              //  List<AtlasClassification> allClassifications = atlasEntity.getClassifications();
+                List<AtlasClassification> allClassifications = v2Notification.getClassifications();
 
                 if (CollectionUtils.isNotEmpty(allClassifications)) {
                     classifications                = new ArrayList<>();
