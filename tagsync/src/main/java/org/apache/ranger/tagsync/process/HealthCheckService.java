@@ -35,6 +35,8 @@ import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +44,7 @@ import java.util.Properties;
 
 public class HealthCheckService implements HttpHandler {
 
+    public static final String UTF_8 = "UTF-8";
     private static final Log LOG = LogFactory.getLog(HealthCheckService.class);
 
     Properties props = null;
@@ -76,17 +79,18 @@ public class HealthCheckService implements HttpHandler {
     }
 
     private void handleResponse(HttpExchange httpExchange, String output) throws IOException {
-
         Headers headers = httpExchange.getResponseHeaders();
-        headers.add("Content-Type", "application/json");
+        headers.add("Content-Type", "application/json; charset="+ UTF_8);
 
         OutputStream outputStream = httpExchange.getResponseBody();
         String htmlResponse = output.toString();
 
-        httpExchange.sendResponseHeaders(200, htmlResponse.length());
+        byte[] bytes = htmlResponse.getBytes(StandardCharsets.UTF_8);
+
+        httpExchange.sendResponseHeaders(200, bytes.length);
 
         try {
-            outputStream.write(htmlResponse.getBytes());
+            outputStream.write(bytes);
             outputStream.flush();
         }finally {
             outputStream.close();

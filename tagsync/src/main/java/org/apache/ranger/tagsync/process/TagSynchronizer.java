@@ -83,7 +83,7 @@ public class TagSynchronizer {
 			try {
 				ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 
-				HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 9999), 0);
+				HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", 9999), 0);
 				server.createContext("/status", new HealthCheckService(props));
 				server.setExecutor(threadPoolExecutor);
 				server.start();
