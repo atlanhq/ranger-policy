@@ -266,22 +266,33 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                 classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
             }
 
+            setClassificationsToRequestContext(classificationsWithSuperTypesEnd1, rangerRequest);
+
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd1);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_ID, end1EntityId);
 
-
-            Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
-
-            for (String classificationToAuthorize : end2Classifications) {
-                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
-            }
-
-            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
-            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd2);
-            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
-
             ret = checkAccess(rangerRequest);
+
+            if(ret) {
+
+                Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
+
+                for (String classificationToAuthorize : end2Classifications) {
+                    classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+                }
+
+                setClassificationsToRequestContext(classificationsWithSuperTypesEnd2, rangerRequest);
+
+                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
+                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd1);
+                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_ID, end1EntityId);
+                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
+                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd2);
+                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
+
+                ret = checkAccess(rangerRequest);
+            }
 
         } finally {
             RangerPerfTracer.log(perf);
@@ -446,19 +457,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             }
 
             if (CollectionUtils.isNotEmpty(request.getEntityClassifications())) {
-                Set<String> entityClassifications = request.getEntityClassifications();
-                Map<String, Object> contextOjb = rangerRequest.getContext();
-
-                Set<RangerTagForEval> rangerTagForEval = getRangerServiceTag(entityClassifications);
-
-                if (contextOjb == null) {
-                    Map<String, Object> contextOjb1 = new HashMap<String, Object>();
-                    contextOjb1.put("CLASSIFICATIONS", rangerTagForEval);
-                    rangerRequest.setContext(contextOjb1);
-                } else {
-                    contextOjb.put("CLASSIFICATIONS", rangerTagForEval);
-                    rangerRequest.setContext(contextOjb);
-                }
+                setClassificationsToRequestContext(request.getEntityClassifications(), rangerRequest);
 
                 // check authorization for each classification
                 for (String classificationToAuthorize : request.getEntityClassifications()) {
@@ -487,6 +486,21 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         }
 
         return ret;
+    }
+
+    private void setClassificationsToRequestContext(Set<String> entityClassifications, RangerAccessRequestImpl rangerRequest) {
+        Map<String, Object> contextOjb = rangerRequest.getContext();
+
+        Set<RangerTagForEval> rangerTagForEval = getRangerServiceTag(entityClassifications);
+
+        if (contextOjb == null) {
+            Map<String, Object> contextOjb1 = new HashMap<String, Object>();
+            contextOjb1.put("CLASSIFICATIONS", rangerTagForEval);
+            rangerRequest.setContext(contextOjb1);
+        } else {
+            contextOjb.put("CLASSIFICATIONS", rangerTagForEval);
+            rangerRequest.setContext(contextOjb);
+        }
     }
 
     Set<RangerTagForEval> getRangerServiceTag(Set<String> classifications) {
