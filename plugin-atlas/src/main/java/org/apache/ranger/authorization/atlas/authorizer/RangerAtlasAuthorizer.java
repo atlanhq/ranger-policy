@@ -41,10 +41,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ranger.audit.model.AuthzAuditEvent;
 import org.apache.ranger.plugin.audit.RangerDefaultAuditHandler;
+import org.apache.ranger.plugin.contextenricher.RangerTagForEval;
 import org.apache.ranger.plugin.model.RangerServiceDef;
+import org.apache.ranger.plugin.model.RangerTag;
 import org.apache.ranger.plugin.policyengine.RangerAccessRequestImpl;
 import org.apache.ranger.plugin.policyengine.RangerAccessResourceImpl;
 import org.apache.ranger.plugin.policyengine.RangerAccessResult;
+import org.apache.ranger.plugin.policyresourcematcher.RangerPolicyResourceMatcher;
 import org.apache.ranger.plugin.service.RangerBasePlugin;
 import org.apache.ranger.plugin.util.RangerPerfTracer;
 
@@ -64,7 +67,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
     }};
 
     private static volatile RangerBasePlugin atlasPlugin = null;
-
+    private static volatile RangerGroupUtil groupUtil = null;
     @Override
     public void init() {
         if (LOG.isDebugEnabled()) {
@@ -85,6 +88,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                     plugin.setResultProcessor(new RangerDefaultAuditHandler(plugin.getConfig()));
 
                     atlasPlugin = plugin;
+                    groupUtil = new RangerGroupUtil(atlasPlugin.getUserStore());
                 }
             }
         }
@@ -263,6 +267,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                 classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
             }
 
+
+
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd1);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_ID, end1EntityId);
@@ -279,6 +285,18 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
 
             ret = checkAccess(rangerRequest);
+
+
+            if (!ret) { // if resource based policy access not available fallback to check tag-based access.
+                setClassificationsToRequestContext(classificationsWithSuperTypesEnd1, rangerRequest);
+                ret = checkAccess(rangerRequest); // tag-based check with end1 classification
+                LOG.info("End1 checkAccess " + ret);
+                if (ret) { //
+                    setClassificationsToRequestContext(classificationsWithSuperTypesEnd2, rangerRequest);
+                    ret = checkAccess(rangerRequest); // tag-based check with end2 classification
+                    LOG.info("End2 checkAccess " + ret);
+                }
+            }
 
         } finally {
             RangerPerfTracer.log(perf);
@@ -336,6 +354,38 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
     }
 
     @Override
+    public void scrubSearchResults(AtlasSearchResultScrubRequest request, boolean isScrubAuditEnabled) throws AtlasAuthorizationException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("==> scrubSearchResults(" + request + " " + isScrubAuditEnabled);
+        RangerPerfTracer perf = null;
+        try {
+            if (RangerPerfTracer.isPerfTraceEnabled(PERF_LOG))
+                perf = RangerPerfTracer.getPerfTracer(PERF_LOG, "RangerAtlasAuthorizer.scrubSearchResults(" + request + ")");
+            AtlasSearchResult result = request.getSearchResult();
+            if (CollectionUtils.isNotEmpty(result.getEntities())) {
+                for (AtlasEntityHeader entity : result.getEntities()) {
+                    checkAccessAndScrub(entity, request, isScrubAuditEnabled);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(result.getFullTextResult())) {
+                for (AtlasSearchResult.AtlasFullTextResult fullTextResult : result.getFullTextResult()) {
+                    if (fullTextResult != null)
+                        checkAccessAndScrub(fullTextResult.getEntity(), request, isScrubAuditEnabled);
+                }
+            }
+            if (MapUtils.isNotEmpty(result.getReferredEntities())) {
+                for (AtlasEntityHeader entity : result.getReferredEntities().values()) {
+                    checkAccessAndScrub(entity, request, isScrubAuditEnabled);
+                }
+            }
+        } finally {
+            RangerPerfTracer.log(perf);
+        }
+        if (LOG.isDebugEnabled())
+            LOG.debug("<== scrubSearchResults(): " + request + " " + isScrubAuditEnabled);
+    }
+
+    @Override
     public void filterTypesDef(AtlasTypesDefFilterRequest request) throws AtlasAuthorizationException {
 
         AtlasTypesDef typesDef = request.getTypesDef();
@@ -377,7 +427,6 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         if (LOG.isDebugEnabled()) {
             LOG.debug("==> isAccessAllowed(" + request + ")");
         }
-
         boolean ret = false;
 
         try {
@@ -411,6 +460,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             }
 
             if (CollectionUtils.isNotEmpty(request.getEntityClassifications())) {
+		setClassificationsToRequestContext(request.getEntityClassifications(), rangerRequest);
+
                 // check authorization for each classification
                 for (String classificationToAuthorize : request.getEntityClassifications()) {
                     rangerResource.setValue(RESOURCE_ENTITY_CLASSIFICATION, request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
@@ -440,14 +491,50 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         return ret;
     }
 
+	
+    private void setClassificationsToRequestContext(Set<String> entityClassifications, RangerAccessRequestImpl rangerRequest) {
+        Map<String, Object> contextOjb = rangerRequest.getContext();
+
+        Set<RangerTagForEval> rangerTagForEval = getRangerServiceTag(entityClassifications);
+
+        if (contextOjb == null) {
+            Map<String, Object> contextOjb1 = new HashMap<String, Object>();
+            contextOjb1.put("CLASSIFICATIONS", rangerTagForEval);
+            rangerRequest.setContext(contextOjb1);
+        } else {
+            contextOjb.put("CLASSIFICATIONS", rangerTagForEval);
+            rangerRequest.setContext(contextOjb);
+        }
+    }
+
+    Set<RangerTagForEval> getRangerServiceTag(Set<String> classifications) {
+        Set<RangerTagForEval> atlasClassificationSet = new HashSet<>();
+
+        for (String classification : classifications) {
+            RangerTag rangerTag = new RangerTag(null, classification, null, RangerTag.OWNER_SERVICERESOURCE);
+            RangerTagForEval tagForEval = new RangerTagForEval(rangerTag, RangerPolicyResourceMatcher.MatchType.SELF);
+            atlasClassificationSet.add(tagForEval);
+        }
+        return atlasClassificationSet;
+    }
+
     private boolean checkAccess(RangerAccessRequestImpl request) {
         boolean          ret    = false;
+        String userName = request.getUser();
         RangerBasePlugin plugin = atlasPlugin;
 
         if (plugin != null) {
+            
+            groupUtil.setUserStore(atlasPlugin.getUserStore());
+            
+            request.setUserGroups(groupUtil.getContainedGroups(userName));
+            
+            LOG.warn("Setting UserGroup for user: "+ userName + " Groups: " + groupUtil.getContainedGroups(userName) );
+            
             RangerAccessResult result = plugin.isAccessAllowed(request);
 
             ret = result != null && result.getIsAllowed();
+
         } else {
             LOG.warn("RangerAtlasPlugin not initialized. Access blocked!!!");
         }
@@ -457,12 +544,24 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
     private boolean checkAccess(RangerAccessRequestImpl request, RangerAtlasAuditHandler auditHandler) {
         boolean          ret    = false;
+        
         RangerBasePlugin plugin = atlasPlugin;
+        String userName = request.getUser();
+
+        LOG.warn("Setting UserGroup for user"+ userName + " Groups: " + groupUtil.getContainedGroups(userName));
 
         if (plugin != null) {
+            
+            groupUtil.setUserStore(atlasPlugin.getUserStore());
+            
+            request.setUserGroups(groupUtil.getContainedGroups(userName));
+            
+            LOG.warn("Setting UserGroup for user :"+ userName + " Groups: " + groupUtil.getContainedGroups(userName) );
+            
             RangerAccessResult result = plugin.isAccessAllowed(request, auditHandler);
 
             ret = result != null && result.getIsAllowed();
+        
         } else {
             LOG.warn("RangerAtlasPlugin not initialized. Access blocked!!!");
         }
@@ -479,7 +578,22 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             entityAccessRequest.setRemoteIPAddress(request.getRemoteIPAddress());
 
             if (!isAccessAllowed(entityAccessRequest, null)) {
-                scrubEntityHeader(entity);
+                scrubEntityHeader(entity, request.getTypeRegistry());
+            }
+        }
+    }
+
+    private void checkAccessAndScrub(AtlasEntityHeader entity, AtlasSearchResultScrubRequest request, boolean isScrubAuditEnabled) throws AtlasAuthorizationException {
+        if (entity != null && request != null) {
+            final AtlasEntityAccessRequest entityAccessRequest = new AtlasEntityAccessRequest(request.getTypeRegistry(), AtlasPrivilege.ENTITY_READ, entity, request.getUser(), request.getUserGroups());
+
+            entityAccessRequest.setClientIPAddress(request.getClientIPAddress());
+            entityAccessRequest.setForwardedAddresses(request.getForwardedAddresses());
+            entityAccessRequest.setRemoteIPAddress(request.getRemoteIPAddress());
+
+            boolean isEntityAccessAllowed  = isScrubAuditEnabled ?  isAccessAllowed(entityAccessRequest) : isAccessAllowed(entityAccessRequest, null);
+            if (!isEntityAccessAllowed) {
+                scrubEntityHeader(entity, request.getTypeRegistry());
             }
         }
     }
