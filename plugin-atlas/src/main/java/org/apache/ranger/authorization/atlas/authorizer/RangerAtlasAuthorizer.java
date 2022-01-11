@@ -266,32 +266,34 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                 classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
             }
 
-            setClassificationsToRequestContext(classificationsWithSuperTypesEnd1, rangerRequest);
+
 
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd1);
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_ID, end1EntityId);
 
+
+            Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
+
+            for (String classificationToAuthorize : end2Classifications) {
+                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            }
+
+            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
+            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd2);
+            rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
+
             ret = checkAccess(rangerRequest);
 
-            if(ret) {
-
-                Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
-
-                for (String classificationToAuthorize : end2Classifications) {
-                    classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            if (!ret) { // if resource based policy access not available fallback to check tag-based access.
+                setClassificationsToRequestContext(classificationsWithSuperTypesEnd1, rangerRequest);
+                ret = checkAccess(rangerRequest); // tag-based check with end1 classification
+                LOG.info("End1 checkAccess " + ret);
+                if (ret) { //
+                    setClassificationsToRequestContext(classificationsWithSuperTypesEnd2, rangerRequest);
+                    ret = checkAccess(rangerRequest); // tag-based check with end2 classification
+                    LOG.info("End2 checkAccess " + ret);
                 }
-
-                setClassificationsToRequestContext(classificationsWithSuperTypesEnd2, rangerRequest);
-
-                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
-                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd1);
-                rangerResource.setValue(RESOURCE_END_ONE_ENTITY_ID, end1EntityId);
-                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
-                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd2);
-                rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
-
-                ret = checkAccess(rangerRequest);
             }
 
         } finally {
