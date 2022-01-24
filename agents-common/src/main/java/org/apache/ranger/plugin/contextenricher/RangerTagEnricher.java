@@ -198,6 +198,8 @@ public class RangerTagEnricher extends RangerAbstractContextEnricher {
 			LOG.debug("==> RangerTagEnricher.enrich(" + request + ") with dataStore:[" + dataStore + "]");
 		}
 
+		Set<RangerTagForEval> atlasClassificationSet = getMatchingAtlasClassificationsToAsset(request);
+
 		final Set<RangerTagForEval> matchedTags;
 
 		try (RangerReadWriteLock.RangerLock readLock = this.lock.getReadLock()) {
@@ -220,7 +222,11 @@ public class RangerTagEnricher extends RangerAbstractContextEnricher {
 				}
 			}
 
-			matchedTags = enrichedServiceTags == null ? null : findMatchingTags(request, enrichedServiceTags);
+			if(atlasClassificationSet!=null && atlasClassificationSet.size() > 0) {
+				matchedTags = atlasClassificationSet;
+			} else {
+				matchedTags = enrichedServiceTags == null ? null : findMatchingTags(request, enrichedServiceTags);
+			}
 
 			RangerAccessRequestUtil.setRequestTagsInContext(request.getContext(), matchedTags);
 		}
@@ -229,6 +235,20 @@ public class RangerTagEnricher extends RangerAbstractContextEnricher {
 			LOG.debug("<== RangerTagEnricher.enrich(" + request + ") with dataStore:[" + dataStore + "]): tags count=" + (matchedTags == null ? 0 : matchedTags.size()));
 		}
 	}
+
+	private Set<RangerTagForEval> getMatchingAtlasClassificationsToAsset(RangerAccessRequest request) {
+
+		Map<String, Object> requestContext = request.getContext();
+
+		Set<RangerTagForEval> atlasClassificationSet = new HashSet<>();
+
+		if (requestContext != null && requestContext.get("CLASSIFICATIONS") != null) {
+			LOG.info("Classification found " + requestContext.get("CLASSIFICATIONS"));
+			atlasClassificationSet = (Set<RangerTagForEval>) requestContext.get("CLASSIFICATIONS");
+		}
+		return atlasClassificationSet;
+	}
+
 	/*
 	 * This class implements a cache of result of look-up of keyset of policy-resources for each of the collections of hierarchies
 	 * for policy types: access, datamask and rowfilter. If a keyset is examined for validity in a hierarchy of a policy-type,
