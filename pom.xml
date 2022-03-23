@@ -23,7 +23,7 @@
     </parent>
     <groupId>org.apache.ranger</groupId>
     <artifactId>ranger</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>2.2.0</version>
     <description>Security for Enforcing Enterprise Policies</description>
     <packaging>pom</packaging>
     <name>ranger</name>
@@ -80,7 +80,7 @@
         <asm.all.version>3.2</asm.all.version>
         <aspectj.version>1.8.2</aspectj.version>
         <assembly.plugin.version>2.6</assembly.plugin.version>
-        <atlas.version>2.2.0</atlas.version>
+        <atlas.version>3.0.0-SNAPSHOT</atlas.version>
         <atlas.gson.version>2.5</atlas.gson.version>
         <atlas.jackson.version>2.11.3</atlas.jackson.version>
         <atlas.jackson.databind.version>2.11.3</atlas.jackson.databind.version>
@@ -164,7 +164,7 @@
         <local.lib.dir>${project.basedir}/../lib/local</local.lib.dir>
         <log4j.version>1.2.17</log4j.version>
         <maven.exec.plugin.version>1.6.0</maven.exec.plugin.version>
-        <maven.pmd.plugin.version>3.14.0</maven.pmd.plugin.version>
+        <maven.pmd.plugin.version>3.7</maven.pmd.plugin.version>
         <metrics.core.version>3.0.2</metrics.core.version>
         <mockito.version>3.0.0</mockito.version>
         <mockito.all.version>1.10.19</mockito.all.version>
@@ -184,7 +184,7 @@
         <security-agent-install-dir>hadoop-security/plugins</security-agent-install-dir>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
-        <solr.version>8.6.3</solr.version>
+        <solr.version>7.7.1</solr.version>
         <spring-ldap-core.version>2.3.3.RELEASE</spring-ldap-core.version>
         <springframework.security.version>5.5.0</springframework.security.version>
         <springframework.test.version>5.3.7</springframework.test.version>
@@ -225,7 +225,9 @@
         <lucene.version>8.4.0</lucene.version>
         <hppc.version>0.8.0</hppc.version>
         <joda.time.version>2.10.6</joda.time.version>
-        <log4j.core.version>2.13.3</log4j.core.version>
+        <log4j.core.version>2.17.0</log4j.core.version>
+        <jsonsmart.version>2.3.1</jsonsmart.version>
+        <nimbus-jose-jwt.version>8.22.1</nimbus-jose-jwt.version>
     </properties>
     <profiles>
         <profile>
