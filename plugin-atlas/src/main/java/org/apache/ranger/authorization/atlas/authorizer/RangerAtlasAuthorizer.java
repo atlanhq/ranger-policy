@@ -157,7 +157,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             }
 
             // not initializing audit handler, so that audits are not logged when entity details are NULL or EMPTY STRING
-            if (!(StringUtils.isEmpty(request.getEntityId()) && request.getClassification() == null && request.getEntity() == null)) {
+            if (!request.isSuppressLogs() && !(StringUtils.isEmpty(request.getEntityId()) && request.getClassification() == null && request.getEntity() == null)) {
                 auditHandler = new RangerAtlasAuditHandler(request, getServiceDef());
             }
 
@@ -282,7 +282,11 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_CLASSIFICATION, classificationsWithSuperTypesEnd2);
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
 
-            ret = checkAccess(rangerRequest);
+            if (request.isSuppressLogs()) {
+                ret = checkAccess(rangerRequest, null);
+            } else {
+                ret = checkAccess(rangerRequest);
+            }
 
         } finally {
             RangerPerfTracer.log(perf);
