@@ -7,7 +7,6 @@ on:
       - master
       - build2.2
       
-
 permissions:
   id-token: write
   contents: write
@@ -192,4 +191,3 @@ jobs:
         build-args: |
             ACCESS_TOKEN_USR=$GITHUB_ACTOR
             ACCESS_TOKEN_PWD=${{ secrets.my_pat }}
-
