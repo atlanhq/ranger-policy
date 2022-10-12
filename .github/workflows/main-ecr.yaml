@@ -83,6 +83,7 @@ jobs:
                       break
                   fi
               done
+              
     - name: Get Semantic Version tag
       id: semver_tag
       run: |
