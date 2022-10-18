@@ -30,6 +30,7 @@ import org.apache.atlas.authorize.AtlasTypeAccessRequest;
 import org.apache.atlas.authorize.AtlasAccessRequest;
 import org.apache.atlas.authorize.AtlasAuthorizer;
 import org.apache.atlas.authorize.AtlasPrivilege;
+import org.apache.atlas.model.instance.AtlasClassification;
 import org.apache.atlas.model.typedef.AtlasBaseTypeDef;
 import org.apache.atlas.model.typedef.AtlasTypesDef;
 import org.apache.atlas.model.discovery.AtlasSearchResult;
@@ -248,11 +249,11 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
             final String      action                      = request.getAction() != null ? request.getAction().getType() : null;
             final Set<String> end1EntityTypeAndSuperTypes = request.getEnd1EntityTypeAndAllSuperTypes();
-            final Set<String> end1Classifications         = new HashSet<>(request.getEnd1EntityClassifications());
+            final Set<AtlasClassification> end1Classifications         = new HashSet<AtlasClassification>(request.getEnd1EntityClassifications());
             final String      end1EntityId                = request.getEnd1EntityId();
 
             final Set<String> end2EntityTypeAndSuperTypes = request.getEnd2EntityTypeAndAllSuperTypes();
-            final Set<String> end2Classifications         = new HashSet<>(request.getEnd2EntityClassifications());
+            final Set<AtlasClassification> end2Classifications         = new HashSet<AtlasClassification>(request.getEnd2EntityClassifications());
             final String      end2EntityId                = request.getEnd2EntityId();
 
 
@@ -272,8 +273,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
             Set<String> classificationsWithSuperTypesEnd1 = new HashSet();
 
-            for (String classificationToAuthorize : end1Classifications) {
-                classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            for (AtlasClassification classificationToAuthorize : end1Classifications) {
+                  classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
             }
 
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
@@ -283,8 +284,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
             Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
 
-            for (String classificationToAuthorize : end2Classifications) {
-                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            for (AtlasClassification classificationToAuthorize : end2Classifications) {
+                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
             }
 
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
@@ -292,6 +293,17 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_ID, end2EntityId);
 
             ret = checkAccess(rangerRequest);
+
+            if (!ret) { // if resource based policy access not available fallback to check tag-based access.
+                setClassificationsToRequestContext(end1Classifications, rangerRequest);
+                ret = checkAccess(rangerRequest); // tag-based check with end1 classification
+                LOG.info("End1 checkAccess " + ret);
+                if (ret) { //
+                    setClassificationsToRequestContext(end2Classifications, rangerRequest);
+                    ret = checkAccess(rangerRequest); // tag-based check with end2 classification
+                    LOG.info("End2 checkAccess " + ret);
+                }
+            }
 
         } finally {
             RangerPerfTracer.log(perf);
@@ -325,13 +337,13 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             rangerRequest.setAccessorsRequested(true);
 
             RangerAccessResult result = null;
-            Set<String> tagNames = request.getEntityClassifications();
+            Set<AtlasClassification> tagNames = request.getEntityClassifications();
             if (CollectionUtils.isNotEmpty(tagNames)) {
                 setClassificationsToRequestContext(tagNames, rangerRequest);
 
                 // check authorization for each classification
-                for (String classificationToAuthorize : tagNames) {
-                    rangerResource.setValue(RESOURCE_ENTITY_CLASSIFICATION, request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+                for (AtlasClassification classificationToAuthorize : tagNames) {
+                    rangerResource.setValue(RESOURCE_ENTITY_CLASSIFICATION, request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
 
                     result = getAccessors(rangerRequest);
                     collectAccessors(result, ret);
@@ -375,11 +387,11 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
 
             final Set<String> end1EntityTypeAndSuperTypes = request.getEnd1EntityTypeAndAllSuperTypes();
-            final Set<String> end1Classifications         = new HashSet<>(request.getEnd1EntityClassifications());
+            final Set<AtlasClassification> end1Classifications         = new HashSet<AtlasClassification>(request.getEnd1EntityClassifications());
             final String      end1EntityId                = request.getEnd1EntityId();
 
             final Set<String> end2EntityTypeAndSuperTypes = request.getEnd2EntityTypeAndAllSuperTypes();
-            final Set<String> end2Classifications         = new HashSet<>(request.getEnd2EntityClassifications());
+            final Set<AtlasClassification> end2Classifications         = new HashSet<AtlasClassification>(request.getEnd2EntityClassifications());
             final String      end2EntityId                = request.getEnd2EntityId();
 
 
@@ -397,8 +409,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
             Set<String> classificationsWithSuperTypesEnd1 = new HashSet();
 
-            for (String classificationToAuthorize : end1Classifications) {
-                classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            for (AtlasClassification classificationToAuthorize : end1Classifications) {
+                classificationsWithSuperTypesEnd1.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
             }
 
             rangerResource.setValue(RESOURCE_END_ONE_ENTITY_TYPE, end1EntityTypeAndSuperTypes);
@@ -408,8 +420,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 
             Set<String> classificationsWithSuperTypesEnd2 = new HashSet();
 
-            for (String classificationToAuthorize : end2Classifications) {
-                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+            for (AtlasClassification classificationToAuthorize : end2Classifications) {
+                classificationsWithSuperTypesEnd2.addAll(request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
             }
 
             rangerResource.setValue(RESOURCE_END_TWO_ENTITY_TYPE, end2EntityTypeAndSuperTypes);
@@ -420,10 +432,10 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             collectAccessors(result, ret);
 
             // Check tag-based access.
-            setClassificationsToRequestContext(classificationsWithSuperTypesEnd1, rangerRequest);
+            setClassificationsToRequestContext(end1Classifications, rangerRequest);
             RangerAccessResult resultEnd1 = getAccessors(rangerRequest); // tag-based accessors with end1 classification
 
-            setClassificationsToRequestContext(classificationsWithSuperTypesEnd2, rangerRequest);
+            setClassificationsToRequestContext(end2Classifications, rangerRequest);
             RangerAccessResult resultEnd2 = getAccessors(rangerRequest); // tag-based accessors with end2 classification
             collectAccessors(resultEnd1, resultEnd2, ret);
         } finally {
@@ -634,7 +646,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             }
 
             if (CollectionUtils.isNotEmpty(request.getEntityClassifications())) {
-                Set<String> entityClassifications = request.getEntityClassifications();
+                Set<AtlasClassification> entityClassifications = request.getEntityClassifications();
                 Map<String, Object> contextOjb = rangerRequest.getContext();
 
                 Set<RangerTagForEval> rangerTagForEval = getRangerServiceTag(entityClassifications);
@@ -649,8 +661,8 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                 }
 
                 // check authorization for each classification
-                for (String classificationToAuthorize : request.getEntityClassifications()) {
-                    rangerResource.setValue(RESOURCE_ENTITY_CLASSIFICATION, request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize));
+                for (AtlasClassification classificationToAuthorize : request.getEntityClassifications()) {
+                    rangerResource.setValue(RESOURCE_ENTITY_CLASSIFICATION, request.getClassificationTypeAndAllSuperTypes(classificationToAuthorize.getTypeName()));
 
                     ret = checkAccess(rangerRequest, auditHandler);
 
@@ -678,7 +690,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
     }
 
 
-    private void setClassificationsToRequestContext(Set<String> entityClassifications, RangerAccessRequestImpl rangerRequest) {
+    private void setClassificationsToRequestContext(Set<AtlasClassification> entityClassifications, RangerAccessRequestImpl rangerRequest) {
         Map<String, Object> contextOjb = rangerRequest.getContext();
 
         Set<RangerTagForEval> rangerTagForEval = getRangerServiceTag(entityClassifications);
@@ -693,15 +705,25 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         }
     }
 
-    Set<RangerTagForEval> getRangerServiceTag(Set<String> classifications) {
+    Set<RangerTagForEval> getRangerServiceTag(Set<AtlasClassification> classifications) {
         Set<RangerTagForEval> atlasClassificationSet = new HashSet<>();
-
-        for (String classification : classifications) {
-            RangerTag rangerTag = new RangerTag(null, classification, null, RangerTag.OWNER_SERVICERESOURCE);
+        for (AtlasClassification classification : classifications) {
+            RangerTag rangerTag = new RangerTag(null, classification.getTypeName(), getClassificationAttributes(classification), RangerTag.OWNER_SERVICERESOURCE);
             RangerTagForEval tagForEval = new RangerTagForEval(rangerTag, RangerPolicyResourceMatcher.MatchType.SELF);
             atlasClassificationSet.add(tagForEval);
         }
         return atlasClassificationSet;
+    }
+
+    private Map<String, String> getClassificationAttributes(AtlasClassification classification) {
+        Map<String, Object> attributes = classification.getAttributes();
+        final Map<String, String> result = new HashMap<String, String>();
+        if(attributes!=null) {
+            for (final Map.Entry<String, Object> entry : attributes.entrySet()) {
+                result.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        }
+        return result;
     }
 
     private boolean checkAccess(RangerAccessRequestImpl request) {
@@ -818,7 +840,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         private       boolean                      denyExists = false;
 
         public RangerAtlasAuditHandler(AtlasEntityAccessRequest request, RangerServiceDef serviceDef) {
-            Collection<String> classifications    = request.getEntityClassifications();
+            Collection<AtlasClassification> classifications    = request.getEntityClassifications();
             String             strClassifications = classifications == null ? "[]" : classifications.toString();
 
             if (request.getClassification() != null) {
