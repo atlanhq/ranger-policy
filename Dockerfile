@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-FROM openjdk:8-jdk-alpine
+FROM openjdk:18-jdk-alpine
 
 RUN mkdir -p /opt/apache/ranger-admin
 
