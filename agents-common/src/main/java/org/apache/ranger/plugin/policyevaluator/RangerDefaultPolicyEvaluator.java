@@ -1267,14 +1267,17 @@ public class RangerDefaultPolicyEvaluator extends RangerAbstractPolicyEvaluator 
 		return ret;
 	}
 
+
 	protected RangerPolicyItemEvaluator getMatchingPolicyItemForAccessPolicyForSpecificAccess(RangerAccessRequest request, RangerAccessResult result) {
-		RangerPolicyItemEvaluator ret = getMatchingPolicyItem(request, result, denyEvaluators, denyExceptionEvaluators);
-
-		if(request.isAccessorsRequested() || (ret == null && !result.getIsAccessDetermined())) { // a deny policy could have set isAllowed=true, but in such case it wouldn't set isAccessDetermined=true
-			ret = getMatchingPolicyItem(request, result, allowEvaluators, allowExceptionEvaluators);
+		RangerPolicyItemEvaluator denyEvaluator = getMatchingPolicyItem(request, result, denyEvaluators, denyExceptionEvaluators);
+		RangerPolicyItemEvaluator evaluator = denyEvaluator;
+		if (request.isAccessorsRequested() || (denyEvaluator == null && !result.getIsAccessDetermined())) { // a deny policy could have set isAllowed=true, but in such case it wouldn't set isAccessDetermined=true
+			RangerPolicyItemEvaluator allowEvaluator = getMatchingPolicyItem(request, result, allowEvaluators, allowExceptionEvaluators);
+			if (allowEvaluator != null && denyEvaluator == null) {
+				evaluator = allowEvaluator;
+			}
 		}
-
-		return ret;
+		return evaluator;
 	}
 
 	protected <T extends RangerPolicyItemEvaluator> T getMatchingPolicyItem(RangerAccessRequest request, RangerAccessResult result,
