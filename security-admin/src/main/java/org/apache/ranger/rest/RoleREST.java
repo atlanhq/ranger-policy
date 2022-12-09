@@ -1251,10 +1251,7 @@ public class RoleREST {
             if (CollectionUtils.isNotEmpty(users)) {
                 Set<RangerRole.RoleMember> roleUsers = new HashSet<>();
                 for (RangerRole.RoleMember user : role.getUsers()) {
-                    if (users.contains(user.getName()) && isAdmin == Boolean.TRUE) {
-                        user.setIsAdmin(isAdmin);
-                        roleUsers.add(user);
-                    }
+                    roleUsers.add(user);
                 }
 
                 Set<String> existingUsernames = getUserNames(role);
