@@ -677,6 +677,7 @@ public class RangerPolicyRetriever {
 		}
 
 		List<RangerPolicy> getAllPolicies() {
+			long start = System.currentTimeMillis();
 			List<RangerPolicy> ret = new ArrayList<>();
 
 			if (iterPolicy != null) {
@@ -688,7 +689,9 @@ public class RangerPolicyRetriever {
 					}
 				}
 			}
-
+			long finish = System.currentTimeMillis();
+			long timeElapsed = finish - start;
+			LOG.error("ctx.getAllPolicies: " + timeElapsed);
 			return ret;
 		}
 	}
