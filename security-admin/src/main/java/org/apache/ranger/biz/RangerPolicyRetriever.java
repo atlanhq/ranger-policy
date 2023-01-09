@@ -487,10 +487,22 @@ public class RangerPolicyRetriever {
 				lookupCache.setDataMaskNameMapping(daoMgr.getXXPolicyRefDataMaskType().findUpdatedDataMaskNamesByService(serviceId));
 				lookupCache.setConditionNameMapping(daoMgr.getXXPolicyRefCondition().findUpdatedConditionNamesByService(serviceId));
 
+				long start = System.currentTimeMillis();
 				this.service    = xService;
+				long mid = System.currentTimeMillis();
 				this.serviceDef = daoMgr.getXXServiceDef().getById(xService.getType());
+				mid = System.currentTimeMillis();
+
 				this.iterPolicy = daoMgr.getXXPolicy().findByServiceId(serviceId).listIterator();
+				mid = System.currentTimeMillis();
+
 				this.iterPolicyLabels = daoMgr.getXXPolicyLabelMap().findByServiceId(serviceId).listIterator();
+				mid = System.currentTimeMillis();
+
+				long finish = System.currentTimeMillis();
+				long timeElapsed = finish - start;
+				LOG.error("ctx.getAllPolicies: " + timeElapsed);
+
 			} else {
 				this.service    = null;
 				this.serviceDef = null;
@@ -511,10 +523,21 @@ public class RangerPolicyRetriever {
 			lookupCache.setConditionNameMapping(daoMgr.getXXPolicyRefCondition().findUpdatedConditionNamesByPolicy(policyId));
 
 			this.service    = xService;
+			long start = System.currentTimeMillis();
 			this.serviceDef = daoMgr.getXXServiceDef().getById(xService.getType());
+			long mid = System.currentTimeMillis();
 			this.iterPolicy = asList(xPolicy).listIterator();
+			mid = System.currentTimeMillis();
+
 			List<XXPolicyLabelMap> policyLabels = daoMgr.getXXPolicyLabelMap().findByPolicyId(policyId);
+			mid = System.currentTimeMillis();
+
 			this.iterPolicyLabels = policyLabels != null ? policyLabels.listIterator() : null;
+			mid = System.currentTimeMillis();
+
+			long finish = System.currentTimeMillis();
+			long timeElapsed = finish - start;
+			LOG.error("ctx.getAllPolicies: " + timeElapsed);
 		}
 
 		RangerPolicy getNextPolicy() {
@@ -677,18 +700,35 @@ public class RangerPolicyRetriever {
 		}
 
 		List<RangerPolicy> getAllPolicies() {
+			long start = System.currentTimeMillis();
 			List<RangerPolicy> ret = new ArrayList<>();
-
+			List<Long> arr = new ArrayList<>();
+			int counter = 0;
+			long prev = 0;
+			HashMap<String, Long> hmap = new HashMap<>();
 			if (iterPolicy != null) {
+
 				while (iterPolicy.hasNext()) {
+
 					RangerPolicy policy = getNextPolicy();
+
+					long mid = System.currentTimeMillis();
+					if(mid-prev > 10){
+						hmap.put(policy.getName(), mid-prev);
+					}
+					prev = mid;
+
 
 					if (policy != null) {
 						ret.add(policy);
 					}
+					counter++;
 				}
-			}
 
+			}
+			long finish = System.currentTimeMillis();
+			long timeElapsed = finish - start;
+			LOG.error("ctx.getAllPolicies: " + timeElapsed);
 			return ret;
 		}
 	}

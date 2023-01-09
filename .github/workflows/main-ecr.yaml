@@ -6,6 +6,7 @@ on:
       - beta
       - master
       - build2.2
+      - debug
       
 permissions:
   id-token: write

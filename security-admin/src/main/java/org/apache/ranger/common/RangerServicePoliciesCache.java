@@ -39,6 +39,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class RangerServicePoliciesCache {
 	private static final Log LOG = LogFactory.getLog(RangerServicePoliciesCache.class);
@@ -185,11 +187,14 @@ public class RangerServicePoliciesCache {
 
 			try {
 				final boolean isCacheReloadedByDQEvent;
-
 				lockResult = lock.tryLock(waitTimeInSeconds, TimeUnit.SECONDS);
 
 				if (lockResult) {
+					long start = System.currentTimeMillis();
 					isCacheReloadedByDQEvent = getLatest(serviceName, serviceStore, lastKnownVersion);
+					long finish = System.currentTimeMillis();
+					long timeElapsed = finish - start;
+					LOG.error("getLatest: " + timeElapsed);
 
 					if (isCacheReloadedByDQEvent) {
 						if (LOG.isDebugEnabled()) {
@@ -204,6 +209,8 @@ public class RangerServicePoliciesCache {
 							LOG.debug("All policies were requested, returning cached ServicePolicies");
 						}
 						ret = this.servicePolicies;
+						System.out.println("---POLICIES FETCHED END---- "  + java.time.LocalTime.now());
+						System.out.println(ret);
 					} else {
 						boolean         isDeltaCacheReinitialized = false;
 						ServicePolicies servicePoliciesForDeltas  = this.deltaCache != null ? this.deltaCache.getServicePolicyDeltasFromVersion(lastKnownVersion) : null;
@@ -271,7 +278,11 @@ public class RangerServicePoliciesCache {
 				final long            startTimeMs           = System.currentTimeMillis();
 				final long            dbLoadTime            = System.currentTimeMillis() - startTimeMs;
 
+				long start = System.currentTimeMillis();
 				ServicePolicies       servicePoliciesFromDb = serviceStore.getServicePolicyDeltasOrPolicies(serviceName, cachedServicePoliciesVersion);
+				long finish = System.currentTimeMillis();
+				long timeElapsed = finish - start;
+				LOG.error("getServicePolicyDeltasOrPolicies: " + timeElapsed);
 
 				if (dbLoadTime > longestDbLoadTimeInMs) {
 					longestDbLoadTimeInMs = dbLoadTime;
