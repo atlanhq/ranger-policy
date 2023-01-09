@@ -39,6 +39,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class RangerServicePoliciesCache {
 	private static final Log LOG = LogFactory.getLog(RangerServicePoliciesCache.class);
@@ -185,11 +187,14 @@ public class RangerServicePoliciesCache {
 
 			try {
 				final boolean isCacheReloadedByDQEvent;
-
+				System.out.println("---LOCK ACQUIRE START---- " + java.time.LocalTime.now());
 				lockResult = lock.tryLock(waitTimeInSeconds, TimeUnit.SECONDS);
+				System.out.println("---LOCK ACQUIRE END---- "  + java.time.LocalTime.now());
 
 				if (lockResult) {
+					System.out.println("---GET LATEST START---- " + java.time.LocalTime.now());
 					isCacheReloadedByDQEvent = getLatest(serviceName, serviceStore, lastKnownVersion);
+					System.out.println("---GET LATEST END---- "  + java.time.LocalTime.now());
 
 					if (isCacheReloadedByDQEvent) {
 						if (LOG.isDebugEnabled()) {
@@ -204,6 +209,8 @@ public class RangerServicePoliciesCache {
 							LOG.debug("All policies were requested, returning cached ServicePolicies");
 						}
 						ret = this.servicePolicies;
+						System.out.println("---POLICIES FETCHED END---- "  + java.time.LocalTime.now());
+						System.out.println(ret);
 					} else {
 						boolean         isDeltaCacheReinitialized = false;
 						ServicePolicies servicePoliciesForDeltas  = this.deltaCache != null ? this.deltaCache.getServicePolicyDeltasFromVersion(lastKnownVersion) : null;
@@ -232,6 +239,8 @@ public class RangerServicePoliciesCache {
 					ret = this.servicePolicies;
 				}
 			} catch (InterruptedException exception) {
+				System.out.println("---LOCK INTERRUPTION---- "  + java.time.LocalTime.now());
+				System.out.println(exception);
 				LOG.error("getLatestOrCached:lock got interrupted..", exception);
 			} finally {
 				if (lockResult) {
