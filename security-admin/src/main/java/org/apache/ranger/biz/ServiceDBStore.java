@@ -2715,7 +2715,11 @@ public class ServiceDBStore extends AbstractServiceStore {
 
 		RangerPolicyRetriever policyRetriever = new RangerPolicyRetriever(daoMgr, txManager);
 
+		long start = System.currentTimeMillis();
 		List<RangerPolicy> ret = policyRetriever.getServicePolicies(service);
+		long finish = System.currentTimeMillis();
+		long timeElapsed = finish - start;
+		LOG.error("policyRetriever.getServicePolicies: " + timeElapsed);
 
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("<== ServiceDBStore.getServicePoliciesFromDb(" + service.getName() + "): count=" + ((ret == null) ? 0 : ret.size()));
@@ -2956,8 +2960,11 @@ public class ServiceDBStore extends AbstractServiceStore {
 				tagPolicies.setServiceDef(tagServiceDef);
 				tagPolicies.setAuditMode(auditMode);
 			}
+			long start = System.currentTimeMillis();
 			List<RangerPolicy> policies = getServicePoliciesFromDb(serviceDbObj);
-
+			long finish = System.currentTimeMillis();
+			long timeElapsed = finish - start;
+			LOG.error("getServicePoliciesFromDb: " + timeElapsed);
 			ret = new ServicePolicies();
 
 			ret.setServiceId(serviceDbObj.getId());

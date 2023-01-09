@@ -677,18 +677,23 @@ public class RangerPolicyRetriever {
 		}
 
 		List<RangerPolicy> getAllPolicies() {
+			long start = System.currentTimeMillis();
 			List<RangerPolicy> ret = new ArrayList<>();
 
 			if (iterPolicy != null) {
 				while (iterPolicy.hasNext()) {
 					RangerPolicy policy = getNextPolicy();
-
+					long mid = System.currentTimeMillis();
+					LOG.error("ctx.getAllPolicies: " + (mid - start));
 					if (policy != null) {
 						ret.add(policy);
 					}
 				}
-			}
 
+			}
+			long finish = System.currentTimeMillis();
+			long timeElapsed = finish - start;
+			LOG.error("ctx.getAllPolicies: " + timeElapsed);
 			return ret;
 		}
 	}
