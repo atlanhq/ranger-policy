@@ -844,10 +844,7 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
             auditEvents  = new HashMap<>();
             resourcePath = rangerResource.getAsString();
             entityGuid = request.getEntityId();
-            //If entity Guid is not null set it in audit event
-            LOG.info("testing_guid");
-            LOG.info(request);
-            LOG.info(rangerResource);
+
         }
 
         @Override
@@ -863,9 +860,10 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
                 if (resourcePath != null) {
                     auditEvent.setResourcePath(resourcePath);
                 }
-
-                auditEvent.setEntityGuid("testGuid");
-
+                //If entity Guid is not null set it in audit event
+                if (entityGuid != null) {
+                    auditEvent.setEntityGuid(entityGuid);
+                }
 
                 if (!result.getIsAllowed()) {
                     denyExists = true;
