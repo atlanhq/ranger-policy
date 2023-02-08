@@ -734,11 +734,13 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         if (plugin != null) {
             
             groupUtil.setUserStore(atlasPlugin.getUserStore());
-            
+
             request.setUserGroups(groupUtil.getContainedGroups(userName));
-            
-            LOG.warn("Setting UserGroup for user: "+ userName + " Groups: " + groupUtil.getContainedGroups(userName) );
-            
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Setting UserGroup for user: " + userName + " Groups: " + groupUtil.getContainedGroups(userName));
+            }
+
             RangerAccessResult result = plugin.isAccessAllowed(request);
 
             ret = result != null && result.getIsAllowed();

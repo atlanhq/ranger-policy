@@ -54,13 +54,13 @@ public class RangerConfiguration extends Configuration {
 				addResource(fUrl);
 				ret = true;
 			} catch (Exception e) {
-				LOG.error("Unable to load the resource name [" + aResourceName + "]. Ignoring the resource:" + fUrl);
+				LOG.warn("Unable to load the resource name [" + aResourceName + "]. Ignoring the resource:" + fUrl);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Resource loading failed for " + fUrl, e);
 				}
 			}
 		} else {
-			LOG.error("addResourceIfReadable(" + aResourceName + "): couldn't find resource file location");
+			LOG.warn("addResourceIfReadable(" + aResourceName + "): couldn't find resource file location");
 		}
 
 		if(LOG.isDebugEnabled()) {
