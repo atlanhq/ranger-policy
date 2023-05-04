@@ -29,8 +29,12 @@ import org.apache.atlas.authorize.AtlasAuthorizationException;
 import org.apache.atlas.authorize.AtlasTypesDefFilterRequest;
 import org.apache.atlas.authorize.AtlasAuthorizer;
 import org.apache.ranger.plugin.classloader.RangerPluginClassLoader;
+import org.apache.ranger.plugin.service.RangerBasePlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class RangerAtlasAuthorizer implements AtlasAuthorizer {
     private static final Logger LOG = LoggerFactory.getLogger(RangerAtlasAuthorizer.class);
@@ -272,6 +276,15 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
 		if (isDebugEnabled) {
 			LOG.debug("<== isAccessAllowed(AtlasTypeAccessRequest): " + ret);
 		}
+
+		return ret;
+	}
+
+	@Override
+	public Set<String> getRolesForCurrentUser(String userName, Set<String> groups) {
+		Set<String> ret = new HashSet<>();
+
+		ret = rangerAtlasAuthorizerImpl.getRolesForCurrentUser(userName, groups);
 
 		return ret;
 	}
