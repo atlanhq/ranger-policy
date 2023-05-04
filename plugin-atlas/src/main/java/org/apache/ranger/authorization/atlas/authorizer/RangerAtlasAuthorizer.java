@@ -496,6 +496,17 @@ public class RangerAtlasAuthorizer implements AtlasAuthorizer {
         return ret;
     }
 
+
+    @Override
+    public Set<String> getRolesForCurrentUser(String userName, Set<String> groups) {
+        Set<String> ret = new HashSet<>();
+
+        RangerBasePlugin plugin = atlasPlugin;
+        ret = plugin.getRolesFromUserAndGroups(userName, groups);
+
+        return ret;
+    }
+
     @Override
     public void scrubSearchResults(AtlasSearchResultScrubRequest request) throws AtlasAuthorizationException {
         if (LOG.isDebugEnabled()) {
