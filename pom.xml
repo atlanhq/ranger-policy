@@ -118,7 +118,7 @@
         <googlecode.log4jdbc.version>1.2</googlecode.log4jdbc.version>
         <gson.version>2.2.4</gson.version>
         <guice.version>4.0</guice.version>
-        <hadoop.version>3.3.0</hadoop.version>
+        <hadoop.version>3.3.1</hadoop.version>
         <ozone.version>1.0.0</ozone.version>
         <hamcrest.version>2.2</hamcrest.version>
         <hbase.version>2.2.6</hbase.version>
@@ -190,7 +190,7 @@
         <springframework.test.version>5.3.7</springframework.test.version>
         <springframework.version>5.3.7</springframework.version>
         <sqoop.version>1.99.7</sqoop.version>
-        <storm.version>1.2.0</storm.version>
+        <storm.version>2.1.0</storm.version>
         <sun-jersey-bundle.version>1.19</sun-jersey-bundle.version>
         <tomcat.embed.version>8.5.69</tomcat.embed.version>
         <testng.version>6.9.4</testng.version>
