@@ -123,7 +123,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <hbase.version>2.2.6</hbase.version>
         <hive.version>3.1.2</hive.version>
-        <hive.storage-api.version>2.7.2</hive.storage-api.version>
+        <hive.storage-api.version>2.8.1</hive.storage-api.version>
         <orc.version>1.5.8</orc.version>
         <hbase-shaded-protobuf>3.3.0</hbase-shaded-protobuf>
         <hbase-shaded-netty>3.3.0</hbase-shaded-netty>
