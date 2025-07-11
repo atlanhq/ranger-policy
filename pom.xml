@@ -198,8 +198,8 @@
         <zookeeper.version>3.4.14</zookeeper.version>
         <codehaus.woodstox.stax2api.version>3.1.4</codehaus.woodstox.stax2api.version>
         <fasterxml.woodstox.version>5.0.3</fasterxml.woodstox.version>
-        <fasterxml.jackson.version>2.11.3</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.11.3</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.version>2.15.0</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.15.0</fasterxml.jackson.databind.version>
         <kstruct.gethostname4j.version>0.0.2</kstruct.gethostname4j.version>
         <jna.version>5.2.0</jna.version>
         <jna-platform.version>5.2.0</jna-platform.version>
@@ -212,8 +212,8 @@
         <presto.re2j.version>1.1</presto.re2j.version>
 
     <!-- Azure Key Vault dependencies -->
-        <com.microsoft.azure.version>1.22.0</com.microsoft.azure.version>
-        <com.microsoft.azure.azure-keyvault.version>1.2.1</com.microsoft.azure.azure-keyvault.version>
+        <com.microsoft.azure.version>1.41.0</com.microsoft.azure.version>
+        <com.microsoft.azure.azure-keyvault.version>1.2.6</com.microsoft.azure.azure-keyvault.version>
         <com.microsoft.azure.azure-mgmt-keyvault.version>1.22.0</com.microsoft.azure.azure-mgmt-keyvault.version>
         <com.microsoft.rest.client-runtime.version>1.6.7</com.microsoft.rest.client-runtime.version>
         <com.microsoft.azure.azure-client-runtime.version>1.6.7</com.microsoft.azure.azure-client-runtime.version>
@@ -227,7 +227,7 @@
         <joda.time.version>2.10.6</joda.time.version>
         <log4j.core.version>2.17.1</log4j.core.version>
         <jsonsmart.version>2.3.1</jsonsmart.version>
-        <nimbus-jose-jwt.version>8.22.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.0.2</nimbus-jose-jwt.version>
     </properties>
     <profiles>
         <profile>
