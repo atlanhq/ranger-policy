@@ -122,7 +122,7 @@
         <ozone.version>1.0.0</ozone.version>
         <hamcrest.version>2.2</hamcrest.version>
         <hbase.version>2.2.6</hbase.version>
-        <hive.version>3.1.2</hive.version>
+        <hive.version>4.0.0</hive.version>
         <hive.storage-api.version>2.7.2</hive.storage-api.version>
         <orc.version>1.5.8</orc.version>
         <hbase-shaded-protobuf>3.3.0</hbase-shaded-protobuf>
