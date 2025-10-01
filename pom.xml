@@ -204,7 +204,7 @@
         <jna.version>5.2.0</jna.version>
         <jna-platform.version>5.2.0</jna-platform.version>
         <!-- presto plugin deps -->
-        <presto.airlift.version>0.192</presto.airlift.version>
+        <presto.airlift.version>226</presto.airlift.version>
         <presto.bval-jsr.version>2.0.0</presto.bval-jsr.version>
         <presto.guice.version>4.2.2</presto.guice.version>
         <presto.guava.version>26.0-jre</presto.guava.version>
