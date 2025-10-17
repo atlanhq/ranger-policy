@@ -118,7 +118,7 @@
         <googlecode.log4jdbc.version>1.2</googlecode.log4jdbc.version>
         <gson.version>2.2.4</gson.version>
         <guice.version>4.0</guice.version>
-        <hadoop.version>3.3.0</hadoop.version>
+        <hadoop.version>3.4.2</hadoop.version>
         <ozone.version>1.0.0</ozone.version>
         <hamcrest.version>2.2</hamcrest.version>
         <hbase.version>2.2.6</hbase.version>
@@ -185,7 +185,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <solr.version>7.7.1</solr.version>
-        <spring-ldap-core.version>2.3.3.RELEASE</spring-ldap-core.version>
+        <spring-ldap-core.version>3.3.4</spring-ldap-core.version>
         <springframework.security.version>5.5.0</springframework.security.version>
         <springframework.test.version>5.3.7</springframework.test.version>
         <springframework.version>5.3.7</springframework.version>
