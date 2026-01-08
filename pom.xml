@@ -172,7 +172,7 @@
         <netty-all.version>4.1.63.Final</netty-all.version>
         <noggit.version>0.8</noggit.version>
         <orc.core.version>1.6.7</orc.core.version>
-        <owasp-java-html-sanitizer.version>r239</owasp-java-html-sanitizer.version>
+        <owasp-java-html-sanitizer.version>20260101.1</owasp-java-html-sanitizer.version>
         <paranamer.version>2.3</paranamer.version>
         <presto.version>333</presto.version>
         <poi.version>4.1.2</poi.version>
